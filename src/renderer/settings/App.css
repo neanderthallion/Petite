@@ -105,6 +105,11 @@ button.danger {
   font-size: 13px;
 }
 
+.field-warning {
+  font-size: 12px;
+  color: #a33;
+}
+
 input,
 select,
 textarea {
@@ -222,4 +227,180 @@ textarea {
 
 .apply-actions .confirm:not(:disabled):hover {
   background: #3e6a4b;
+}
+
+.pet-manager {
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e0ddd8;
+}
+
+.pet-manager h2 {
+  font-size: 15px;
+  margin: 0 0 10px;
+}
+
+.pet-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pet-card {
+  background: #fff;
+  border: 1px solid #e0ddd8;
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pet-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pet-name {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 6px 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.pet-usage {
+  font-size: 12px;
+  color: #777;
+}
+
+.pet-thumb-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.pet-thumb-wrap {
+  position: relative;
+  width: 64px;
+  height: 64px;
+}
+
+.pet-thumb {
+  width: 64px;
+  height: 64px;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: 1px solid #e0ddd8;
+  border-radius: 6px;
+}
+
+.pet-thumb-remove {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 18px;
+  height: 18px;
+  line-height: 16px;
+  padding: 0;
+  border: 1px solid #d99;
+  color: #a33;
+  background: #fff;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.add-picture {
+  width: 64px;
+  height: 64px;
+  border: 1px dashed #bbb;
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+  font-size: 11px;
+  color: #666;
+}
+
+.add-picture:hover {
+  background: #faf9f7;
+}
+
+.add-pet-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.add-pet-row input {
+  flex: 1;
+}
+
+.crop-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.crop-modal {
+  background: #fff;
+  border: 1px solid #e0ddd8;
+  border-radius: 10px;
+  padding: 16px;
+  width: 360px;
+  max-width: calc(100vw - 32px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.crop-container {
+  position: relative;
+  width: 100%;
+  height: 280px;
+  background: #222;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.crop-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.crop-modal-actions button {
+  padding: 7px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  background: none;
+}
+
+.crop-modal-actions .confirm {
+  background: #4a7c59;
+  border-color: #4a7c59;
+  color: #fff;
+}
+
+.crop-modal-actions button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.crop-preview {
+  border: 1px solid #e0ddd8;
+  border-radius: 6px;
+  background-image: conic-gradient(#eee 90deg, #fff 90deg 180deg, #eee 180deg 270deg, #fff 270deg 360deg);
+  background-size: 16px 16px;
+  align-self: center;
 }

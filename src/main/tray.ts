@@ -10,11 +10,19 @@ export interface TrayCallbacks {
 
 let tray: Tray | null = null
 
+function trayIconPath(): string {
+  // Deliberately independent of the (now user-editable/deletable) pets list —
+  // extraResources in package.json's build config copies resources/ alongside
+  // the packaged app; in dev it's read straight from the repo.
+  return app.isPackaged
+    ? join(process.resourcesPath, 'resources', 'tray-icon.png')
+    : join(app.getAppPath(), 'resources', 'tray-icon.png')
+}
+
 function loadTrayIcon() {
-  // Placeholder: derived from a cat pose, scaled down. Swap for a dedicated
-  // 16x16/32x32 tray icon asset before shipping.
-  const iconPath = join(app.getAppPath(), 'pet', 'Cat1.png')
-  const image = nativeImage.createFromPath(iconPath)
+  // Placeholder art derived from a cat pose, scaled down. Swap resources/tray-icon.png
+  // for dedicated icon art before shipping.
+  const image = nativeImage.createFromPath(trayIconPath())
   return image.isEmpty() ? nativeImage.createEmpty() : image.resize({ width: 16, height: 16 })
 }
 

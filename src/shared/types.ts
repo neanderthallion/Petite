@@ -1,5 +1,3 @@
-export type PetSpecies = 'cat' | 'dog' | 'pokemon'
-
 /** 0 = Sunday ... 6 = Saturday, matches Date#getDay() */
 export type DayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6
 
@@ -20,13 +18,30 @@ export interface MessageRule {
   id: string
   name: string
   enabled: boolean
-  species: PetSpecies
+  /** References a PetProfile.id. Kept as `species` for backwards compatibility with persisted data. */
+  species: string
   contentList: string[]
   scheduleType: 'interval' | 'fixed'
   intervalConfig?: IntervalScheduleConfig
   fixedConfig?: FixedScheduleConfig
   snoozeDurationMinutes: number
 }
+
+export interface PetProfile {
+  id: string
+  label: string
+  /** Each entry is a CSS url()-usable reference: a relative filename for
+   *  built-in poses (served from src/renderer/public/pet/), or a
+   *  petasset://<petId>/<file>.png URL for user-uploaded poses. */
+  poses: string[]
+}
+
+export type PickImageResult =
+  | { canceled: true }
+  | { canceled: false; error: 'unreadable' }
+  | { canceled: false; dataUrl: string; fileName: string }
+
+export type DeletePetResult = { ok: true } | { ok: false; reason: 'in-use'; count: number }
 
 export interface PetPosition {
   x: number
@@ -42,17 +57,19 @@ export interface AppSettings {
 export interface TriggerPayload {
   ruleId: string
   ruleName: string
-  species: PetSpecies
+  species: string
+  /** Resolved at trigger time from the live pets list, so the pet window never needs a species lookup table. */
+  poses: string[]
   message: string
   snoozeDurationMinutes: number
 }
 
-export function createDefaultRule(): MessageRule {
+export function createDefaultRule(defaultPetId: string): MessageRule {
   return {
     id: crypto.randomUUID(),
     name: 'New reminder',
     enabled: true,
-    species: 'cat',
+    species: defaultPetId,
     contentList: [''],
     scheduleType: 'interval',
     intervalConfig: {

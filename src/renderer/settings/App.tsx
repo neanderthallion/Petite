@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import RuleEditor from './RuleEditor'
+import PetManager from './PetManager'
 import { createDefaultRule } from '../../shared/types'
-import type { AppSettings, MessageRule } from '../../shared/types'
+import type { AppSettings, MessageRule, PetProfile } from '../../shared/types'
 
 interface Snapshot {
   rules: MessageRule[]
@@ -11,16 +12,24 @@ interface Snapshot {
 export default function App(): JSX.Element {
   const [draft, setDraft] = useState<Snapshot | null>(null)
   const [applied, setApplied] = useState<Snapshot | null>(null)
+  const [pets, setPets] = useState<PetProfile[] | null>(null)
 
   useEffect(() => {
-    Promise.all([window.petite.getRules(), window.petite.getSettings()]).then(([rules, settings]) => {
-      const snapshot = { rules, settings }
-      setDraft(snapshot)
-      setApplied(snapshot)
-    })
+    Promise.all([window.petite.getRules(), window.petite.getSettings(), window.petite.getPets()]).then(
+      ([rules, settings, fetchedPets]) => {
+        const snapshot = { rules, settings }
+        setDraft(snapshot)
+        setApplied(snapshot)
+        setPets(fetchedPets)
+      }
+    )
   }, [])
 
-  if (draft === null || applied === null) {
+  const refreshPets = (): void => {
+    window.petite.getPets().then(setPets)
+  }
+
+  if (draft === null || applied === null || pets === null) {
     return <div className="loading">Loading…</div>
   }
 
@@ -34,7 +43,7 @@ export default function App(): JSX.Element {
 
   const deleteRule = (id: string): void => setRules(draft.rules.filter((r) => r.id !== id))
 
-  const addRule = (): void => setRules([...draft.rules, createDefaultRule()])
+  const addRule = (): void => setRules([...draft.rules, createDefaultRule(pets[0]?.id ?? '')])
 
   const applyChanges = (): void => {
     window.petite.setRules(draft.rules)
@@ -68,12 +77,15 @@ export default function App(): JSX.Element {
         </div>
       </header>
 
+      <PetManager pets={pets} rules={draft.rules} onPetsChanged={refreshPets} />
+
       <div className="rule-list">
         {draft.rules.length === 0 && <p className="empty-state">No reminders yet — add one below.</p>}
         {draft.rules.map((rule) => (
           <RuleEditor
             key={rule.id}
             rule={rule}
+            pets={pets}
             onChange={(updated) => updateRule(rule.id, updated)}
             onDelete={() => deleteRule(rule.id)}
           />

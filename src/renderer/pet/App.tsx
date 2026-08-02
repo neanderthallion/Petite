@@ -1,8 +1,6 @@
 import { useEffect, useState, type CSSProperties } from 'react'
-import { PET_SPECIES_CONFIG, randomPoseIndex } from '../../shared/spriteConfig'
+import { SPRITE_SIZE, randomPoseIndex } from '../../shared/spriteConfig'
 import type { TriggerPayload } from '../../shared/types'
-
-const SPRITE_SIZE = 150
 
 export default function App(): JSX.Element | null {
   const [payload, setPayload] = useState<TriggerPayload | null>(null)
@@ -10,12 +8,12 @@ export default function App(): JSX.Element | null {
 
   useEffect(() => window.petite.onShowMessage((incoming) => {
     setPayload(incoming)
-    setPoseIndex(randomPoseIndex(incoming.species))
+    setPoseIndex(randomPoseIndex(incoming.poses) ?? 0)
   }), [])
 
-  if (!payload) return null
+  if (!payload || payload.poses.length === 0) return null
 
-  const { poses } = PET_SPECIES_CONFIG[payload.species]
+  const { poses } = payload
   // Relative (not "/pet/...") so it still resolves under the file:// URLs
   // used by the packaged/preview build, not just the dev server.
   const spriteStyle: CSSProperties = {

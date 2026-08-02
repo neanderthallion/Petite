@@ -14,6 +14,8 @@ npm run dev
 
 This launches the app: a hidden transparent pet window (appears when a reminder fires) plus a tray icon (right-click for Settings / Pause / Quit).
 
+**A new reminder does not show the pet immediately.** It only appears once the scheduler's next computed trigger arrives — which respects the rule's Active days and Active window, so it can be minutes away, or not until tomorrow if "now" falls outside the window. Remember to also click **Apply changes** in Settings; edits aren't sent to the scheduler until then. Use each reminder's **Test now** button to show the pet immediately and confirm it's wired up correctly, independent of schedule/pause state.
+
 ## Project layout
 - `src/main` — Electron main process: window management, tray, local storage, the reminder scheduler (`scheduler.ts`).
 - `src/preload` — contextBridge API (`window.petite`) exposed to both renderer windows.

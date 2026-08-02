@@ -1,11 +1,16 @@
 import { app, ipcMain, powerMonitor } from 'electron'
 import { IPC } from '../shared/ipcChannels'
 import type { AppSettings, MessageRule, TriggerPayload } from '../shared/types'
-import { getRules, setRules as persistRules, getSettings, setSettings as persistSettings } from './store'
+import { getRules, setRules as persistRules, getSettings, setSettings as persistSettings, getPets } from './store'
 import { Scheduler } from './scheduler'
 import { createPetWindow, getPetWindow } from './windows/petWindow'
 import { openSettingsWindow } from './windows/settingsWindow'
 import { createTray } from './tray'
+import { registerPetAssetProtocolHandler, registerPetAssetScheme } from './petAssets'
+import { registerPetIpcHandlers } from './petHandlers'
+
+// Must run before app is ready.
+registerPetAssetScheme()
 
 const gotLock = app.requestSingleInstanceLock()
 
@@ -15,12 +20,17 @@ if (!gotLock) {
   let isShowingMessage = false
   const queue: TriggerPayload[] = []
 
+  function poseListFor(petId: string): string[] {
+    return getPets().find((p) => p.id === petId)?.poses ?? []
+  }
+
   const scheduler = new Scheduler((rule, message) => {
     if (getSettings().paused) return
     enqueue({
       ruleId: rule.id,
       ruleName: rule.name,
       species: rule.species,
+      poses: poseListFor(rule.species),
       message,
       snoozeDurationMinutes: rule.snoozeDurationMinutes
     })
@@ -73,7 +83,9 @@ if (!gotLock) {
     powerMonitor.on('resume', () => scheduler.rescheduleAll())
     powerMonitor.on('unlock-screen', () => scheduler.rescheduleAll())
 
+    registerPetAssetProtocolHandler()
     registerIpcHandlers()
+    registerPetIpcHandlers()
   })
 
   function registerIpcHandlers(): void {
@@ -93,6 +105,20 @@ if (!gotLock) {
 
     ipcMain.handle(IPC.OPEN_SETTINGS, () => {
       openSettingsWindow()
+    })
+
+    ipcMain.handle(IPC.TEST_RULE, (_event, rule: MessageRule) => {
+      const content = rule.contentList.map((c) => c.trim()).filter((c) => c.length > 0)
+      if (content.length === 0) return
+      // Bypasses paused/schedule so users get immediate feedback that the pet works.
+      enqueue({
+        ruleId: rule.id,
+        ruleName: rule.name,
+        species: rule.species,
+        poses: poseListFor(rule.species),
+        message: content[Math.floor(Math.random() * content.length)],
+        snoozeDurationMinutes: rule.snoozeDurationMinutes
+      })
     })
 
     ipcMain.on(IPC.DISMISS_MESSAGE, () => {

@@ -1,5 +1,4 @@
-import type { DayOfWeek, MessageRule, PetSpecies } from '../../shared/types'
-import { PET_SPECIES_CONFIG } from '../../shared/spriteConfig'
+import type { DayOfWeek, MessageRule, PetProfile } from '../../shared/types'
 
 const DAY_LABELS: { day: DayOfWeek; label: string }[] = [
   { day: 0, label: 'Su' },
@@ -34,12 +33,16 @@ function DayPicker(props: { activeDays: DayOfWeek[]; onChange: (days: DayOfWeek[
 
 export default function RuleEditor(props: {
   rule: MessageRule
+  pets: PetProfile[]
   onChange: (rule: MessageRule) => void
   onDelete: () => void
 }): JSX.Element {
-  const { rule, onChange, onDelete } = props
+  const { rule, pets, onChange, onDelete } = props
 
   const update = (patch: Partial<MessageRule>): void => onChange({ ...rule, ...patch })
+
+  const hasContent = rule.contentList.some((c) => c.trim().length > 0)
+  const selectedPetUsable = pets.some((p) => p.id === rule.species && p.poses.length > 0)
 
   return (
     <div className="rule-card">
@@ -54,6 +57,14 @@ export default function RuleEditor(props: {
           <input type="checkbox" checked={rule.enabled} onChange={(e) => update({ enabled: e.target.checked })} />
           Enabled
         </label>
+        <button
+          type="button"
+          disabled={!hasContent}
+          title={hasContent ? 'Show this reminder on the pet right now' : 'Add a message first'}
+          onClick={() => window.petite.testRule(rule)}
+        >
+          Test now
+        </button>
         <button type="button" className="danger" onClick={onDelete}>
           Delete
         </button>
@@ -62,12 +73,19 @@ export default function RuleEditor(props: {
       <div className="field-row">
         <label>
           Pet
-          <select value={rule.species} onChange={(e) => update({ species: e.target.value as PetSpecies })}>
-            {(Object.keys(PET_SPECIES_CONFIG) as PetSpecies[]).map((species) => (
-              <option key={species} value={species}>
-                {PET_SPECIES_CONFIG[species].label}
+          <select value={rule.species} onChange={(e) => update({ species: e.target.value })}>
+            {pets
+              .filter((p) => p.poses.length > 0)
+              .map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.label}
+                </option>
+              ))}
+            {!selectedPetUsable && (
+              <option value={rule.species} disabled>
+                {pets.find((p) => p.id === rule.species)?.label ?? 'Unknown pet (deleted)'}
               </option>
-            ))}
+            )}
           </select>
         </label>
 
@@ -82,6 +100,13 @@ export default function RuleEditor(props: {
         </label>
       </div>
 
+      {!selectedPetUsable && (
+        <span className="field-warning">
+          This reminder&apos;s pet has no pictures yet (or was deleted) and will never appear correctly. Choose a
+          different pet or add pictures to it.
+        </span>
+      )}
+
       <label className="block">
         Messages (one per line — a random one is shown each time)
         <textarea
@@ -90,6 +115,11 @@ export default function RuleEditor(props: {
           onChange={(e) => update({ contentList: e.target.value.split('\n') })}
           placeholder={'Time to stretch!\nDrink some water.'}
         />
+        {rule.enabled && !hasContent && (
+          <span className="field-warning">
+            This reminder is enabled but has no message text, so it will never appear. Add at least one message.
+          </span>
+        )}
       </label>
 
       <div className="field-row">
