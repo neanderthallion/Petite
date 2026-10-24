@@ -1,6 +1,6 @@
 # Petite
 
-Desktop pet reminder app. See `PRD.md` for the full spec.
+Desktop pet reminder app (vibe-coded). See `PRD.md` for the full spec.
 
 ## Stack
 Electron + React + TypeScript, bundled with `electron-vite`. Rules/settings persist locally via `electron-store` (`%APPDATA%/petite/config.json`).
